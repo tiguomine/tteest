@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fullscreen Video with Neon Background, Live Icon, and 3D Emojis + Sound</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+      background: #000;
+    }
+    .neon-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      filter: blur(60px) brightness(0.7);
+      pointer-events: none;
+    }
+    .video-container {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      padding: 3vw 0 0 0;
+      box-sizing: border-box;
+      width: 100vw;
+      height: 100vh;
+    }
+    .video-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 94vw;
+      max-height: 94vh;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 0 60px 10px #00ffe7, 0 0 120px 30px #ff00e7;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      outline: none;
+      border: none;
+      background: #111;
+    }
+    .live-badge {
+      position: absolute;
+      top: 1.2vw;
+      left: 1.2vw;
+      display: flex;
+      align-items: center;
+      background: rgba(0,0,0,0.7);
+      border-radius: 1.5em;
+      padding: 0.25em 0.9em 0.25em 0.5em;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 1.1em;
+      color: #fff;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      z-index: 10;
+      box-shadow: 0 2px 8px #0004;
+      user-select: none;
+    }
+    .live-dot {
+      width: 0.8em;
+      height: 0.8em;
+      border-radius: 50%;
+      background: #ff1744;
+      margin-right: 0.5em;
+      box-shadow: 0 0 8px 2px #ff1744aa;
+      animation: liveDotPulse 1.1s infinite alternate;
+      flex-shrink: 0;
+    }
+    @keyframes liveDotPulse {
+      0% { opacity: 1; box-shadow: 0 0 8px 2px #ff1744aa; }
+      100% { opacity: 0.5; box-shadow: 0 0 16px 6px #ff174488; }
+    }
+    .emoji-pop {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      font-size: 1.1rem;
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0;
+      animation: popUp 2.2s cubic-bezier(.17,.67,.83,.67) forwards;
+      will-change: transform, opacity;
+      filter:
+        drop-shadow(0 2px 8px #0008)
+        drop-shadow(0 0 12px #fff8)
+        drop-shadow(0 8px 24px #00ffe7aa);
+      perspective: 400px;
+      transform-style: preserve-3d;
+    }
+    @keyframes popUp {
+      0% {
+        transform: translate(-50%, 0) scale(0.7) rotateX(60deg) rotateY(-30deg) rotate(-10deg);
+        opacity: 0;
+        filter:
+          drop-shadow(0 2px 8px #0008)
+          drop-shadow(0 0 12px #fff8)
+          drop-shadow(0 8px 24px #00ffe7aa)
+          brightness(1.2);
+      }
+      10% {
+        opacity: 1;
+        filter:
+          drop-shadow(0 2px 8px #0008)
+          drop-shadow(0 0 12px #fff8)
+          drop-shadow(0 8px 24px #00ffe7aa)
+          brightness(1.1);
+      }
+      80% {
+        opacity: 1;
+        filter:
+          drop-shadow(0 2px 8px #0008)
+          drop-shadow(0 0 12px #fff8)
+          drop-shadow(0 8px 24px #00ffe7aa)
+          brightness(1);
+      }
+      100% {
+        transform: translate(-50%, -350px) scale(1) rotateX(-30deg) rotateY(30deg) rotate(10deg);
+        opacity: 0;
+        filter:
+          drop-shadow(0 2px 8px #0008)
+          drop-shadow(0 0 12px #fff8)
+          drop-shadow(0 8px 24px #00ffe7aa)
+          brightness(0.8);
+      }
+    }
+    .emoji-row {
+      margin-top: 1.5vw;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      z-index: 5;
+      background: rgba(0,0,0,0.25);
+      border-radius: 2em;
+      padding: 0.3em 1em;
+      box-shadow: 0 2px 8px #0003;
+      user-select: none;
+      perspective: 400px;
+      justify-content: center;
+      width: 100%;
+      max-width: 94vw;
+    }
+    .emoji-btn {
+      font-size: 1.5em;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+      outline: none;
+      filter:
+        drop-shadow(0 2px 8px #0008)
+        drop-shadow(0 0 8px #fff8);
+      border-radius: 50%;
+      padding: 0.1em 0.2em;
+      box-shadow: 0 4px 16px #00ffe7aa;
+      transform-style: preserve-3d;
+    }
+    .emoji-btn:active {
+      transform: scale(1.2) rotateX(20deg) rotateY(-20deg);
+      background: rgba(255,255,255,0.08);
+      box-shadow: 0 2px 8px #ff00e7aa;
+    }
+    @media (max-width: 700px) {
+      .video-container {
+        padding: 1vw 0 0 0;
+      }
+      .video-frame {
+        border-radius: 12px;
+        max-width: 99vw;
+        max-height: 99vh;
+      }
+      .live-badge {
+        top: 2vw;
+        left: 2vw;
+        font-size: 1em;
+        padding: 0.18em 0.7em 0.18em 0.4em;
+      }
+      .emoji-row {
+        padding: 0.2em 0.5em;
+        margin-top: 1vw;
+      }
+    }
+    @media (max-width: 480px) {
+      .live-badge {
+        font-size: 0.95em;
+        top: 3vw;
+        left: 3vw;
+      }
+      .emoji-pop {
+        font-size: 0.9rem !important;
+      }
+      .emoji-row {
+        font-size: 0.95em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="neon-bg" id="neonBg"></div>
+  <div class="video-container">
+    <div class="video-frame">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE
+      </div>
+      <video
+        id="mainVideo"
+        src="myvideo.mp4"
+        autoplay
+        loop
+        muted
+        playsinline
+        tabindex="-1"
+      ></video>
+    </div>
+    <div class="emoji-row">
+      <button class="emoji-btn" data-emoji="😍">😍</button>
+      <button class="emoji-btn" data-emoji="🥵">🥵</button>
+      <button class="emoji-btn" data-emoji="🤤">🤤</button>
+      <button class="emoji-btn" data-emoji="💦">💦</button>
+      <button class="emoji-btn" data-emoji="👀">👀</button>
+      <button class="emoji-btn" data-emoji="😂">😂</button>
+      <button class="emoji-btn" data-emoji="🔥">🔥</button>
+      <button class="emoji-btn" data-emoji="😎">😎</button>
+      <button class="emoji-btn" data-emoji="🥰">🥰</button>
+      <button class="emoji-btn" data-emoji="😳">😳</button>
+      <button class="emoji-btn" data-emoji="😇">😇</button>
+      <button class="emoji-btn" data-emoji="😘">😘</button>
+      <button class="emoji-btn" data-emoji="😜">😜</button>
+      <button class="emoji-btn" data-emoji="😏">😏</button>
+      <button class="emoji-btn" data-emoji="😋">😋</button>
+      <button class="emoji-btn" data-emoji="😚">😚</button>
+      <button class="emoji-btn" data-emoji="😻">😻</button>
+      <button class="emoji-btn" data-emoji="💖">💖</button>
+      <button class="emoji-btn" data-emoji="💘">💘</button>
+      <button class="emoji-btn" data-emoji="💝">💝</button>
+      <button class="emoji-btn" data-emoji="💗">💗</button>
+      <button class="emoji-btn" data-emoji="💓">💓</button>
+      <button class="emoji-btn" data-emoji="💞">💞</button>
+      <button class="emoji-btn" data-emoji="💟">💟</button>
+      <button class="emoji-btn" data-emoji="💌">💌</button>
+      <button class="emoji-btn" data-emoji="👄">👄</button>
+      <button class="emoji-btn" data-emoji="👅">👅</button>
+    </div>
+    <!-- Sound for emoji tap -->
+    <audio id="emojiSound" preload="auto">
+      <source src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfa4c3e.mp3" type="audio/mp3">
+    </audio>
+  </div>
+  <script>
+    // Neon background animation
+    const neonBg = document.getElementById('neonBg');
+    function animateNeonBg() {
+      const t = performance.now() * 0.0002;
+      const x1 = 30 + Math.sin(t) * 20;
+      const y1 = 30 + Math.cos(t * 1.3) * 20;
+      const x2 = 70 + Math.cos(t * 0.9) * 20;
+      const y2 = 70 + Math.sin(t * 1.1) * 20;
+      const x3 = 80 + Math.sin(t * 0.7) * 15;
+      const y3 = 20 + Math.cos(t * 1.7) * 15;
+      neonBg.style.background = `
+        radial-gradient(circle at ${x1}% ${y1}%, #00ffe7 0%, transparent 60%),
+        radial-gradient(circle at ${x2}% ${y2}%, #ff00e7 0%, transparent 60%),
+        radial-gradient(circle at ${x3}% ${y3}%, #00ff6a 0%, transparent 60%)
+      `;
+      requestAnimationFrame(animateNeonBg);
+    }
+    animateNeonBg();
+
+    // Emoji pop-up animation (only on click)
+    function popEmoji(emojiChar) {
+      const emoji = document.createElement('div');
+      emoji.className = 'emoji-pop';
+      emoji.textContent = emojiChar;
+      // Random horizontal position (10% to 90%)
+      const left = 10 + Math.random() * 80;
+      emoji.style.left = left + 'vw';
+      // Smaller random size
+      emoji.style.fontSize = (0.9 + Math.random() * 0.7) + 'rem';
+      // Random animation duration
+      emoji.style.animationDuration = (1.8 + Math.random() * 1.2) + 's';
+      // Random 3D rotation for each emoji
+      const rotX = -30 + Math.random() * 60;
+      const rotY = -30 + Math.random() * 60;
+      emoji.style.transform = `translate(-50%, 0) scale(0.7) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      document.body.appendChild(emoji);
+      // Remove after animation
+      emoji.addEventListener('animationend', () => emoji.remove());
+    }
+    // Emoji button click with sound
+    const emojiSound = document.getElementById('emojiSound');
+    document.querySelectorAll('.emoji-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        const emoji = btn.dataset.emoji;
+        popEmoji(emoji);
+        // Play sound
+        emojiSound.currentTime = 0;
+        emojiSound.play();
+      });
+    });
+  </script>
+</body>
+</html>
